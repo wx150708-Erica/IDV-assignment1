@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Singapore PSI</title>
+    </head>
+
+    <body BGCOLOR="#FFF0F5">
+        <h1 ALIGN="CENTER">
+            <FONT COLOR="#CC6699" FACE="calibri">
+                Singapore PSI
+            </FONT>
+        </h1>
+
+        <p ALIGN="CENTER">
+            Air pollution readings
+        </p>
+
+        <table border="1" cellpadding="8" align="center">
+            <thead>
+                <tr BGCOLOR="#FFC0CB">
+                    <th>Metric</th>
+                    <th>Central</th>
+                    <th>West</th>
+                    <th>East</th>
+                    <th>North</th>
+                    <th>South</th>
+                </tr>
+            </thead>
+
+            <tbody id="readings">
+            </tbody>
+        </table>
+
+        <p ALIGN="CENTER" id="time">
+            Loading...
+        </p>
+
+        <p ALIGN="CENTER">
+            <button onclick="getData()">Refresh</button>
+        </p>
+
+        <p ALIGN="CENTER">
+            Source: data.gov.sg
+        </p>
+
+        <script>
+            async function getData() {
+                try {
+                    let response = await fetch(
+                        "https://api-open.data.gov.sg/v2/real-time/api/psi"
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Cannot load data");
+                    }
+
+                    let result = await response.json();
+                    let item = result.data.items[0];
+                    let readings = item.readings;
+                    let rows = "";
+
+                    for (let metric in readings) {
+                        let values = readings[metric];
+
+                        rows += "<tr>";
+                        rows += "<td>" + metric + "</td>";
+                        rows += "<td>" + values.central + "</td>";
+                        rows += "<td>" + values.west + "</td>";
+                        rows += "<td>" + values.east + "</td>";
+                        rows += "<td>" + values.north + "</td>";
+                        rows += "<td>" + values.south + "</td>";
+                        rows += "</tr>";
+                    }
+
+                    document.getElementById("readings").innerHTML = rows;
+
+                    document.getElementById("time").textContent =
+                        "Reading time: " + item.timestamp;
+                } catch (error) {
+                    document.getElementById("time").textContent =
+                        "Cannot load data. Please try again.";
+                }
+            }
+
+            getData();
+        </script>
+    </body>
+</html>
